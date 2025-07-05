@@ -1,0 +1,76 @@
+/* App Component Styles */
+.app-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+.app-header {
+  text-align: center;
+  padding: 2rem 1rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.app-title {
+  font-size: 3rem;
+  font-weight: 800;
+  color: white;
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  margin: 0;
+  background: linear-gradient(45deg, #fff, #f0f0f0);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: 2px;
+}
+
+.app-subtitle {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 0.5rem;
+  font-weight: 400;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.app-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app-header {
+    padding: 1.5rem 1rem 0.5rem;
+  }
+  
+  .app-title {
+    font-size: 2rem;
+    letter-spacing: 1px;
+  }
+  
+  .app-subtitle {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 1rem 0.5rem 0.5rem;
+  }
+  
+  .app-title {
+    font-size: 1.5rem;
+    letter-spacing: 0.5px;
+  }
+  
+  .app-subtitle {
+    font-size: 0.9rem;
+  }
+}
