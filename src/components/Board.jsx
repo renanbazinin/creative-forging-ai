@@ -7,24 +7,55 @@ export default function Board({ onSave }) {
   const [prediction, setPrediction] = useState(null);
   // 'User': allow clicks; 'PendingAI': waiting 2s; 'AI': fetching/applying AI moves
   const [currentTurn, setCurrentTurn] = useState('User');
+  const [isPainting, setIsPainting] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(null);
   // refs for initial 5s delay and recurring timers
   const initialRef = useRef(true);
   const timerRef = useRef(null);
+  const intervalRef = useRef(null);
   const tilesRef = useRef(tiles);
   useEffect(() => { tilesRef.current = tiles; }, [tiles]);
 
-  const handleCellClick = (x, y) => {
-    // block only when AI is processing
+  // register global mouseup to end painting
+  useEffect(() => {
+    window.addEventListener('mouseup', handleMouseUp);
+    return () => window.removeEventListener('mouseup', handleMouseUp);
+  }, [isPainting]);
+
+
+  const paintCell = (x, y) => {
     if (currentTurn === 'AI') return;
-    clearTimeout(timerRef.current);
     if (tilesRef.current.some(t => t.x === x && t.y === y)) return;
     setTiles(prev => [...prev, { x, y, player: 1 }]);
+    // reset AI timer for 2s after each paint
+    scheduleAITimer(2);
+  };
+
+  const startPaint = (x, y) => {
+    paintCell(x, y);
+    setIsPainting(true);
+  };
+
+  const handleMouseUp = () => {
+    if (!isPainting) return;
+    setIsPainting(false);
+  };
+
+  // schedule AI after delay seconds and show countdown
+  const scheduleAITimer = (delay) => {
+    clearTimeout(timerRef.current);
+    clearInterval(intervalRef.current);
+    setTimeLeft(delay);
     setCurrentTurn('PendingAI');
-    console.log(`User clicked (${x},${y}). Debouncing AI for 2s`);
+    intervalRef.current = setInterval(() => {
+      setTimeLeft(prev => (prev > 1 ? prev - 1 : 0));
+    }, 1000);
     timerRef.current = setTimeout(() => {
-      console.log('2s inactivity passed. Switching to AI turn');
+      clearInterval(intervalRef.current);
+      setTimeLeft(0);
       setCurrentTurn('AI');
-    }, 2000);
+      setTimeLeft(null);
+    }, delay * 1000);
   };
 
   // AI turn: send current board, receive new board, place AI blocks
@@ -78,14 +109,12 @@ export default function Board({ onSave }) {
     setCurrentTurn('User');
   };
 
+
   // initial AI trigger if no user action in first 5s
   useEffect(() => {
-    console.log('Game start: debouncing AI for 5s');
-    timerRef.current = setTimeout(() => {
-      console.log('5s idle passed. Switching to AI turn');
-      setCurrentTurn('AI');
-    }, 5000);
-    return () => clearTimeout(timerRef.current);
+    // initial 5s countdown to AI start
+    scheduleAITimer(5);
+    return () => { clearTimeout(timerRef.current); clearInterval(intervalRef.current); };
   }, []);
 
   // whenever turn becomes 'AI', fire triggerAI
@@ -115,7 +144,7 @@ export default function Board({ onSave }) {
       <div className="board-header">
         <div className={`current-player ${currentTurn === 'AI' ? 'ai-turn' : 'user-turn'}`}>
           {currentTurn === 'User' && "Your Turn"}
-          {currentTurn === 'PendingAI' && "Your Turn (AI incoming in 2s)"}
+          {currentTurn === 'PendingAI' && `AI in ${timeLeft || 0}s`}
           {currentTurn === 'AI' && "AI's Turn"}
         </div>
         <div className="button-group">
@@ -160,8 +189,11 @@ export default function Board({ onSave }) {
             return (
               <div
                 key={`${col}-${row}`}
+                data-x={col} data-y={row}
                 className={cellClasses}
-                onClick={() => handleCellClick(col, row)}
+                onMouseDown={() => startPaint(col, row)}
+                onMouseEnter={() => isPainting && paintCell(col, row)}
+                draggable={false}
               />
             );
           })
