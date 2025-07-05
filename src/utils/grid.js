@@ -4,10 +4,12 @@
 export function isContiguous(positions) {
   const items = new Set(positions.map(p => `${p.x},${p.y}`));
   if (items.size === 0) return true;
-  // 8-directional connectivity (orthogonal + diagonal)
+  // 4-directional (orthogonal) connectivity
   const dirs = [
-    [1, 0],  [-1, 0],  [0, 1],  [0, -1],
-    [1, 1],  [1, -1], [-1, 1], [-1, -1]
+    [1, 0],
+    [-1, 0],
+    [0, 1],
+    [0, -1]
   ];
   const [start] = positions;
   const fringe = [start];
@@ -34,26 +36,37 @@ export function isContiguous(positions) {
 /**
  * For a given tile index, return all valid adjacent moves that keep contiguity.
  */
+/**
+ * For a given tile index, return all valid adjacent moves based on perimeter cells.
+ * Matches Python allowed_pos: neighbors of all other tiles, excluding duplicates and occupied.
+ */
 export function allowedMoves(allPos, targetIndex) {
-  // Return all orthogonally adjacent empty cells (perimeter blocks can move into any free neighbor)
-  const target = allPos[targetIndex];
-  const deltas = [[1,0],[-1,0],[0,1],[0,-1]];
-  const gridLimit = 10; // grid size
-  const occupied = new Set(allPos.map(p => `${p.x},${p.y}`));
-  const moves = [];
-  for (let [dx, dy] of deltas) {
-    const nx = target.x + dx;
-    const ny = target.y + dy;
-    // skip out-of-bounds
-    if (nx < 0 || ny < 0 || nx >= gridLimit || ny >= gridLimit) continue;
-    const key = `${nx},${ny}`;
-    if (!occupied.has(key)) {
-      // test 8-directional contiguity after move
-      const newPositions = allPos.map((p, i) => i === targetIndex ? { x: nx, y: ny } : p);
-      if (isContiguous(newPositions)) {
-        moves.push({ x: nx, y: ny });
-      }
-    }
+  // First, check if removing the tile would break contiguity.
+  const remaining = allPos.filter((_, i) => i !== targetIndex);
+  if (!isContiguous(remaining)) {
+    return []; // This move would break the shape.
   }
-  return moves;
+
+  const gridLimit = 10;
+  const deltas = [[1,0],[-1,0],[0,1],[0,-1]];
+  // occupied coordinates
+  const occupied = new Set(allPos.map(p => `${p.x},${p.y}`));
+  // collect neighbor positions of all other tiles (the remaining shape)
+  const candidate = new Set();
+  remaining.forEach((p) => {
+    deltas.forEach(([dx, dy]) => {
+      const nx = p.x + dx;
+      const ny = p.y + dy;
+      if (nx >= 0 && ny >= 0 && nx < gridLimit && ny < gridLimit) {
+        candidate.add(`${nx},${ny}`);
+      }
+    });
+  });
+  // filter out occupied
+  return Array.from(candidate)
+    .filter(key => !occupied.has(key))
+    .map(key => {
+      const [x, y] = key.split(',').map(Number);
+      return { x, y };
+    });
 }
