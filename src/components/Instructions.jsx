@@ -1,17 +1,17 @@
 import React from 'react';
-import './Instructions.css';
 
-export default function Instructions({ onBack }) {
+export default function Instructions() {
   return (
-    <div className="instructions-container">
-      <h2>How to Play</h2>
+    <div style={{ maxWidth: '400px', margin: '0 auto', fontFamily: 'Segoe UI', padding: '1rem' }}>
+      <h2>How to Play Shifting Shapes</h2>
       <ol>
-        <li>Select Two Players or play against the Agent.</li>
-        <li>Take turns placing one tile per turn on the board.</li>
-        <li>Once placed, tiles cannot be moved in this mode.</li>
-        <li>Click "Save Shape" to record the current pattern.</li>
+        <li>Your board is a 10×10 grid.</li>
+        <li>There are exactly 10 green blocks forming one connected shape.</li>
+        <li>Click on any edge block (perimeter of the shape) to select it.</li>
+        <li>Then click an adjacent empty cell highlighted in blue to move the block.</li>
+        <li>After each move, the blocks must remain a single continuous shape.</li>
       </ol>
-      <button className="back-button" onClick={onBack}>Back to Menu</button>
+      <p>Try morphing the line into interesting configurations!</p>
     </div>
   );
 }
