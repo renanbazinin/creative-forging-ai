@@ -3,7 +3,7 @@ import { allowedMoves } from '../utils/grid';
 import { API_URL } from '../config';
 import './Board.css';
 
-export default function Board() {
+export default function Board({ onSave }) {
   const gridSize = 10;
   const cellSize = 40;
   const tileMargin = 2; // margin around each tile for separation
@@ -207,6 +207,21 @@ export default function Board() {
         {isWaiting && <p>{statusMessage}</p>}
         {!isTimerRunning && !isWaiting && !statusMessage && <p>Click an edge block to select, then click a highlighted cell to move it.</p>}
         {statusMessage && !isWaiting && <p style={{color: 'red'}}>{statusMessage}</p>}
+      </div>
+      {/* Save control for gallery */}
+      {/* Save control for gallery: pass full 2D grid */}
+      <div className="board-controls">
+        <button
+          className="save-shape-button"
+          onClick={() => {
+            const grid = Array.from({ length: gridSize }, () => Array(gridSize).fill(0));
+            tiles.forEach(({ x, y }) => { grid[gridSize - 1 - y][x] = 1; });
+            onSave(grid);
+          }}
+          disabled={isWaiting}
+        >
+          Save Shape
+        </button>
       </div>
     </div>
   );

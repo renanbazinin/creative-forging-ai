@@ -49,3 +49,26 @@
   min-height: 1.5rem;
   text-align: center;
 }
+/* Save Shape button styles */
+.board-controls {
+  margin-top: 1rem;
+  text-align: center;
+}
+.save-shape-button {
+  background-color: #0f0;
+  color: #000;
+  padding: 0.5rem 1rem;
+  font-weight: bold;
+  border: 2px solid #0f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.save-shape-button:hover:not(:disabled) {
+  background-color: #000;
+  color: #0f0;
+}
+.save-shape-button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
