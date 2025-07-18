@@ -18,6 +18,8 @@ export default function Board({ onSave }) {
   const [isWaiting, setIsWaiting] = useState(false);
   const [statusMessage, setStatusMessage] = useState('');
   const [predictions, setPredictions] = useState([]);
+  const [debugMode, setDebugMode] = useState(false);
+  const [debugContext, setDebugContext] = useState('');
 
   const timerRef = useRef(null);
   const isRequestPending = useRef(false); // Ref to track pending request
@@ -63,12 +65,18 @@ export default function Board({ onSave }) {
     console.log('🚀 Sending board to server:', JSON.stringify(grid, null, 2));
 
     try {
+      // include debug flag and context when enabled
+      const payload = { board: grid };
+      if (debugMode) {
+        payload.debug = 1;
+        payload.context = debugContext;
+      }
       const response = await fetch(`${API_URL}/getBoard`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ board: grid }),
+        body: JSON.stringify(payload),
       });
 
       const responseText = await response.text();
@@ -135,7 +143,9 @@ export default function Board({ onSave }) {
       if (move) {
         const newTiles = tiles.map((t, i) => i === selectedIndex ? { x: col, y: row } : t);
         setTiles(newTiles);
-        setTimer(2);
+        // In debug mode, delay auto-send by setting a long timer; else normal 2s
+        const delay = debugMode ? 1000 : 2;
+        setTimer(delay);
         setIsTimerRunning(true);
       }
       setSelectedIndex(null);
@@ -221,6 +231,34 @@ export default function Board({ onSave }) {
           disabled={isWaiting}
         >
           Save Shape
+        </button>
+        <div className="debug-controls">
+          <label className="debug-toggle">
+            <input
+              type="checkbox"
+              checked={debugMode}
+              onChange={() => setDebugMode(dm => !dm)}
+              disabled={isWaiting}
+            />
+            Debug Mode
+          </label>
+          {debugMode && (
+            <textarea
+              className="debug-textarea"
+              placeholder="Enter debug context…"
+              value={debugContext}
+              onChange={e => setDebugContext(e.target.value)}
+              disabled={isWaiting}
+            />
+          )}
+        </div>
+        {/* AI Move button to immediately send board to AI */}
+        <button
+          className="ai-move-button"
+          onClick={() => { setIsTimerRunning(false); sendBoard(); }}
+          disabled={isWaiting}
+        >
+          Let AI Move Manually
         </button>
       </div>
     </div>
